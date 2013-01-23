@@ -52,14 +52,25 @@
 	}
       }
       var suburl = location.href.split("?")[1]
+      var params = location.href.split("?")[2]
       if (suburl == undefined) {
 	  location.href = "?r/music"
       }
+      if (params != undefined) {
+	  params = params + "&"
+      } else {
+	  params = ""
+      }
       function getQueue() {
-	  var after = "after=" + next + "&";
+	  var after = ""
+	  if (next != "") {
+	     after = "after=" + next + "&";
+	  } 
+	  var url = "http://www.reddit.com/" + suburl + ".json?" + params + after
+			  + "jsonp=?";
+	  console.log(url)
 	  $.ajax({
-             url:  "http://www.reddit.com/" + suburl + "/.json?" + after
-			  + "jsonp=?",
+             url:  url,
 	     dataType: "jsonp",
 	     crossDomain: true
           }).done(function ( data ) {
