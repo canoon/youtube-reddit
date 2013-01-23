@@ -53,7 +53,7 @@
       }
       var suburl = location.href.split("?")[1]
       if (suburl == "") {
-	  location = "?r/music"
+	  location.href = "?r/music"
       }
       function getQueue() {
 	  var after = "after=" + next + "&";
