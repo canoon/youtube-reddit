@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <a id="title" href="#"><h1>Loading...</h1></a>
+    <a id="comments" href="#">comments</a> | <a
+    href="javascript:playNextVideo()">next &gt;&gt;</a>
+    <br>
+    <div id="player"></div>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <script>
+      var tag = document.createElement('script');
+
+      tag.src = "http://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      var player;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: '390',
+          width: '640',
+	  events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+      }
+
+      var queue = [];
+      var next = ""
+      function getId(url) {
+	// http://stackoverflow.com/questions/2597080/regex-to-parse-youtube-yid
+	return /(v=|\/)([\w-]+)(&.+)?$/.exec(url)[2]
+      }
+      function playNextVideo() {
+	 if (queue.length == 0) {
+		 getQueue()
+	         return
+         }
+	 var video = queue.shift();
+	 console.log(video)
+	 player.loadVideoById(getId(video["url"]));
+	 $("#title > h1").html(video["title"]);
+	 $("#title").attr("href", video["url"]);
+	 $("#comments").attr("href", "http://reddit.com" +
+			 video["permalink"]);
+      }
+
+      function onPlayerStateChange(event) {
+	if (event.data == YT.PlayerState.ENDED) {
+	  playNextVideo();
+	}
+      }
+      var suburl = location.href.split("?")[1]
+      if (suburl == "") {
+	  location = "?r/music"
+      }
+      function getQueue() {
+	  var after = "after=" + next + "&";
+	  $.ajax({
+             url:  "http://www.reddit.com/" + suburl + "/.json?" + after
+			  + "jsonp=?",
+	     dataType: "jsonp",
+	     crossDomain: true
+          }).done(function ( data ) {
+		console.log(data)
+		console.log(data["data"]["children"])
+		queue = $.grep($.map(data["data"]["children"],
+				function(x) {
+				  return x["data"];
+				})
+				, function(x) {
+			console.log(x)
+			console.log(x["url"])
+			return (/https?:\/\/(.*.)?youtube.com\//i).test(x["url"]);
+		});
+		next = data["data"]["after"]
+		console.log(queue);
+		playNextVideo();
+          });
+       }
+      function onPlayerReady(event) {
+	 console.log(event)
+         playNextVideo();
+      }
+
+    </script>
+  </body>
+</html>
