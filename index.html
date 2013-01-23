@@ -52,7 +52,7 @@
 	}
       }
       var suburl = location.href.split("?")[1]
-      if (suburl == "") {
+      if (suburl == undefined) {
 	  location.href = "?r/music"
       }
       function getQueue() {
